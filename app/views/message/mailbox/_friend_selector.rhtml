@@ -1,0 +1,21 @@
+
+<div style='width:250px; text-align:center;'>
+  Search: <input type='text' name='search' id='friend_selector_filter' value='' onkeyup='MessageViewer.filterFriends();'  class='text_field' size='20'/>
+</div>
+<div style='padding:5px; width:265px; height:400px; overflow:auto; border:1px solid #000000; margin:0 10px 0 0;' id='friend_selector'>
+<% friends.each do |friend| %>
+<% friend_subgroups = friend.is_a?(SocialUnit) ? friend.sub_groups : [ nil ] %>
+<% friend_subgroups.each do |sub_group| -%>
+  <div class='friend_selector_friend<%= ' friend_selected' if message.recipient_id_array.include?((sub_group ? "#{sub_group}_" : "") + friend.full_identifier ) %>' title='<%= vh friend.name.downcase  + (sub_group ? " #{sub_group.downcase}" : "") %>' id='friend_<%= (sub_group ? "#{sub_group}_" : "") +  friend.full_identifier %>' style='width:110px; height:95px; overflow:hidden; text-align:center; margin-bottom:5px; margin-right:5px; padding:5px; float:left;' onclick='MessageViewer.toggleRecipient("<%= (sub_group ? "#{sub_group}_" : "") +  friend.full_identifier %>","<%= jvh(friend.name + (sub_group ? " #{sub_group.capitalize}" : "")) %>");'  >
+  <% if friend.image %>
+    <%= friend.image.image_tag(:thumb, :style => 'padding:2px;  border:1px solid #CCCCCC; background-color:white;') %>
+  <% else -%>
+    
+  <% end -%><br/>
+  <div class='friend_selector_name'  id='friend_<%= (sub_group ? "#{sub_group}_" : "") +   friend.full_identifier %>_name'><%= h friend.name  + (sub_group ? " #{sub_group.capitalize}" : "") %></div>
+  </div>
+<% end -%>
+<% end -%>
+<div style='clear:both;'></div>
+
+</div>

@@ -1,0 +1,33 @@
+<div id='chat_window_<%= chat.id %>' class='chat_window'  style='visibility:hidden; width:170px; zoom:1; position:relative;' >
+  <div id='chat_header_<%= chat.id %>' class='chat_header'>
+   <div class='chat_window_controls'><a href='javascript:void(0);' onclick='MessageNotify.closeWindow(<%= chat.id %>);'>X</a></div>
+    <%= chat.title(myself) %>
+  </div>
+  <div id='chat_body_<%= chat.id %>' class='chat_body' style='height:150px;'>
+    <% chat.messages.each do |msg| -%>
+      <% if msg.notification? %>
+      <div class='chat_message <%= "chat_message_#{msg.from_user == myself ? 'self' : 'other'}" %>'><i>(<%= msg.created_at.strftime("%I:%M %p") %>)</i> <i><b><%= h msg.from_user.name %> <%= h(msg.message) %></b></i></div>
+      <% else -%>
+      <div class='chat_message <%= "chat_message_#{msg.from_user == myself ? 'self' : 'other'}" %>'><i>(<%= msg.created_at.strftime("%I:%M %p") %>)</i> <b><%= h msg.from_user.name %></b> : <%= h(msg.message) %></div>
+      <% end -%>
+    <% end -%>
+  </div>
+  <div class='chat_controls'>
+  <form onsubmit='MessageNotify.sendMessage(<%= chat.id %>); return false;'>
+   <table style='width:100%'>
+    <tr><td width='100%'>
+     <input type='text' class='chat_field' id='chat_field_<%= chat.id %>' name='chat_field' />
+     </td><td nowrap='1'>&nbsp;
+   <button onclick='MessageNotify.sendMessage(<%= chat.id %>); return false;'>Send</button>
+   </td>
+   </table>
+   </form>
+    <div id='chat_resizer_<%= chat.id %>' class='chat_resizer' ></div>
+    <div style='clear:both;'></div>
+  </div>
+</div>
+
+<script>
+setTimeout(function() {
+MessageNotify.createChatWindow(<%= chat.id %>); },10);
+</script>

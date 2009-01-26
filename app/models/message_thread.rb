@@ -1,0 +1,6 @@
+
+
+class MessageThread < DomainModel
+
+
+end

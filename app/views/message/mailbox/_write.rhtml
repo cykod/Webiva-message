@@ -1,0 +1,20 @@
+
+
+<table>
+<tr>
+<td valign='top'>
+<div <%= "style='display:none;'" if friends.length == 0 %>>
+  <%= render :partial => '/message/mailbox/friend_selector', :locals => { :friends => friends, :message => message } %>
+</div>
+</td>
+<td valign='top'>
+<% cms_form_for :message, message, :url => '', :html => { :onsubmit => 'MessageViewer.submitMessage(); return false;',  :id => 'message_write_form' } do |f| -%>
+<%= f.autocomplete_field :recipients, ajax_url_for(renderer,:page => 'autocomplete'), :vertical => true, :label => 'Message To:', :size => 40, :noun => 'A recipient', :multiple => true, :callback => 'MessageViewer.updateRecipients', :type => 'textarea', :html => { :style => 'width:300px;', :rows =>5 } %>
+<%= f.hidden_field :recipient_ids %>
+<%= f.text_field :subject, :vertical => true, :style => 'width:300px;'  %>
+<%= f.text_area :message, :vertical => true, :style => 'width:300px;', :cols => 45, :rows => 8 %>
+<%= f.submit_cancel_tags 'Send','Cancel',{},{:onclick => 'MessageViewer.cancelMessage(); return false;' } %>
+
+<% end -%>
+</td>
+</table>

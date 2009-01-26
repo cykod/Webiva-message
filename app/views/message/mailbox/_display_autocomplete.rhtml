@@ -1,0 +1,27 @@
+<% if users.length > 0 %>
+<ul class="autocomplete_list">
+<% for user in users do -%>
+<% user_subgroups = user.is_a?(SocialUnit) ? user.sub_groups : [ nil ] %>
+<% user_subgroups.each do |sub_group| -%>
+
+  <li class="autocomplete_item" id='end_user_<%= (sub_group ? "#{sub_group}_" : "") + user.full_identifier %>'>
+    <% if user.image %>
+      <%= user.image.image_tag(:icon,:align => 'left') %>
+    <% end -%>
+    <div class="name"><%=h user.name + (sub_group ? " #{sub_group.capitalize}" : "") %></div>
+    <div class="subtext">
+      <%=  %>
+    </div>
+    <div class='display_value' style='display:none;'><%= h(user.name  + (sub_group ? " #{sub_group.capitalize}" : "")) %></div>
+    <div class='recipient_id' style='display:none;'><%= h((sub_group ? "#{sub_group}_" : "") + user.full_identifier) %></div>
+    <div style='clear:both;'></div>
+  </li>
+<% end -%>
+<% end -%>
+</ul>
+<% else -%>
+<ul class="autocomplete_list"><li style='display:none;'>
+    <div class='display_value' style='display:none;'></div>
+</li></ul>
+  No Results Found
+<% end -%>

@@ -1,0 +1,131 @@
+MessageViewer = {
+  writeMessage:function() {
+    MessageViewer.updateMailbox({ page: 'write' });
+  },
+  
+  viewMessage:function(msg_id) {
+    var params = { page: 'message',message_id: msg_id };
+    MessageViewer.updateMailbox(params);
+  },
+  
+  userLookup:function(name) {
+  },
+  
+  replyMessage:function(msg_id) {
+    var params = Form.serialize('message_write_form') + "&page=message&message_id=" + msg_id;
+    MessageViewer.updateMailbox(params);
+  },
+  
+  submitMessage:function() {
+    var params = Form.serialize('message_write_form') + "&page=write"
+    MessageViewer.updateMailbox(params);
+  },
+  
+  submitNotification:function(msg_id,act) {
+    var params = { page: 'message', message_id: msg_id, notify_action: act };
+    MessageViewer.updateMailbox(params);
+  
+  },
+  
+  cancelMessage:function() {
+    MessageViewer.updateMailbox({ page: 'inbox' });
+  },
+  
+  updateMailbox:function(params) {
+    new Ajax.Updater("mailbox_details","<%= ajax_url_for(renderer) %>", 
+      { parameters: params, 
+        evalScripts: true,
+        onComplete: function(req) {
+            RedBox.setWindowPosition();
+        }
+      }    
+    );  
+  
+  },
+  
+  
+  currentRecipients: function() {
+    var current = $('message_recipient_ids').value
+    var current = current == '' ? [] : current.split(",");
+    current = current.uniq();
+    return current  
+  },
+  
+  setRecipients: function(recip) {
+    recip = recip.uniq();
+    $('message_recipient_ids').value = recip.join(",");
+  },
+  
+  updateRecipients: function(fld,li) {
+    var recipient_id = li.select('.recipient_id')[0].innerHTML;
+    
+    if($('friend_' + recipient_id)) {
+      $('friend_' + recipient_id).addClassName('friend_selected');
+    }    
+    var current = MessageViewer.currentRecipients();
+    current.push(recipient_id);
+    MessageViewer.setRecipients(current);
+  },
+  
+  getRecipientStringArr: function() {
+    var current = $('message_recipients').value
+    current = current.split(",");
+    current = current.invoke('strip');
+    return current;
+  },
+  
+  addRecipientString: function(name) {
+    var current = MessageViewer.getRecipientStringArr();
+    name=name.strip();
+    
+    current.push(name);
+    current = current.uniq();
+    current = current.select(function(elm) { return elm != "" });
+    $('message_recipients').value = current.join(", ");
+  },
+  
+  removeRecipientString: function(name) {
+    name=name.strip();
+    var current = MessageViewer.getRecipientStringArr();
+    current  = current.select(function(elm) { return elm != name });
+    current = current.uniq();
+    current = current.select(function(elm) { return elm != "" });
+    $('message_recipients').value = current.join(", ");
+  },
+  
+  
+  toggleRecipient: function(rid,name) {
+    var current = MessageViewer.currentRecipients();
+    if(current.include(rid)) {
+      MessageViewer.removeRecipientString(name);
+      current = current.select(function(elm) {return elm != rid });
+      MessageViewer.setRecipients(current);
+      $('friend_' + rid).removeClassName('friend_selected');
+    }
+    else {
+      MessageViewer.addRecipientString(name);
+      current.push(rid);
+      MessageViewer.setRecipients(current);
+      $('friend_' + rid).addClassName('friend_selected');
+    }
+  },
+  
+  filterFriends: function() {
+    var search = $('friend_selector_filter').value.toLowerCase();
+    
+    var elms = $('friend_selector').select('.friend_selector_friend');
+    var len = elms.length;
+    for(var i=0;i<len;i++) {
+      if(elms[i].title.include(search)) {
+        elms[i].style.display='';
+      }
+      else {
+        elms[i].style.display='none';
+      }
+    }
+  
+  }
+  
+  
+};
+

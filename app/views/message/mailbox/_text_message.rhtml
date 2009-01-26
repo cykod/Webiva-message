@@ -1,0 +1,54 @@
+<script>
+  
+TextMessageViewer = {
+  submitMessage:function() {
+    Element.appear('send_message_wait');
+    $('send_message_button').disabled = true;
+    
+    var params = Form.serialize('message_txt_form')
+    TextMessageViewer.updateTxtForm(params);
+  },
+  
+  cancelMessage:function() {
+    RedBox.close();
+  },
+  
+  updateTxtForm:function(params) {
+    new Ajax.Updater("message_txt_form","<%= ajax_url_for(renderer) %>", 
+      { parameters: params, 
+        evalScripts: true,
+        onComplete: function(req) {
+            RedBox.setWindowPosition();
+        }
+      }    
+    );  
+  
+  },
+  updateRecipients: function(fld,li) {
+    var recipient_id = li.select('.recipient_id')[0].innerHTML;
+    var current = $('message_recipient_ids').value
+    var current = current == '' ? [] : current.split(",");
+    current.push(recipient_id);
+    current = current.uniq();
+    $('message_recipient_ids').value = current.join(",");
+  },
+  
+  updateRemaining: function() { 
+    var val =  $('message_message').value;
+    var remaining = 160 - <%= message_length %> - val.length;
+    
+    if(remaining > 0)
+      $('characters_remaining').innerHTML = 'Approx ' + remaining + ' characters remaining';
+    else
+      $('characters_remaining').innerHTML = 'Please remove ' + (-remaining) + ' characters';
+
+  }
+};
+
+  <%= render :partial => '/message/mailbox/message_javascript', :locals =>  { :renderer => renderer }  %>
+
+</script>
+
+<div id='message_txt_form'>
+  <%= render :partial => '/message/mailbox/text_message_form', :locals => {:message => message, :renderer => renderer, :friends => friends } %>
+</div>

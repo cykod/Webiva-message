@@ -1,0 +1,19 @@
+<div class='admin_content'>
+<% cms_form_for :options, @options, :html => {:class =>'admin_form' } do |f| -%>
+
+  <%= f.radio_buttons :use_friends, [['Yes',true],['No',false]], :label => 'Use Social Module friends' %>
+
+  <%= f.radio_buttons :overlay, [['Yes',true],['No',false]] %>
+  <%= f.select :inbox_page_id , SiteNode.page_options %>
+  <%= f.select :sms_page_id , SiteNode.page_options %>
+  <%= f.select :message_template_id, MailTemplate.site_template_options %>
+  <%= f.text_field :clickatel_api_id %>
+  <%= f.text_field :clickatel_user %>
+  <%= f.text_field :clickatel_password %>
+  <%= f.text_field :message_header %>
+  <%= f.text_field :message_footer %>
+  <%= f.text_field :daily_limit %>
+<%= f.submit_tag 'Save' %>
+
+<%  end -%>
+</div>

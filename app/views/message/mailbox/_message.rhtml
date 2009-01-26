@@ -1,0 +1,63 @@
+<div class='message_header'>
+<table>
+<tr>
+  <td align='center'>
+    <a href='javascript:void(0);' onclick='MessageViewer.cancelMessage();'>&laquo; Back to Inbox</a>
+  </td>
+</tr>
+    
+</table>
+</div>
+<br/>
+<table width='100%'>
+<tr>
+  <td valign='top'>
+  <% if message.from_user -%>
+    <% if SocialFriend.is_friend?(message.from_user,myself) -%>
+      <%= message.from_user.image.image_tag(:preview) %>
+    <% else -%>
+      <%= (message.from_user.second_image || message.from_user.image).image_tag(:preview) %>
+    <% end -%>
+  <% end -%>
+  </td>
+  <td valign='top' width='100%'>
+      <table class='styled_table' width='100%' cellpadding='0' cellspacing='0'>
+      <tr>
+        <td rowspan='4'>
+
+        </td>
+        <td class='label'>Sent:</td>
+        <td class='data'><%= h(message.created_at.strftime("%A, %B %d %Y %I:%M %P")) %></td>
+      </tr>
+      <% unless message.from_user.blank? %>
+      <tr>
+        <td class='label'>From:</td>
+        <td class='data' width='100%'><%= h(message.from_user.name) %></td>
+      </tr>
+      <% end -%>
+      <% unless message.notification? %>
+      <tr>
+        <td class='label'>To:</td>
+        <td class='data'><%= message.recipients.blank? ? message.to_user.name :  h(message.recipients) %></td>
+      </tr>
+      <% end -%>
+      <tr>
+        <td colspan='2' style='width:500px;'>
+          <hr/>
+          <%= content %>
+        </td>
+      </tr>
+      </table>
+      <% unless message.from_user.blank? || (message.notification? && !message.message_message.handled?) %>
+      <br/><br/>      
+      <% cms_form_for :message, reply, :html => { :onsubmit => "MessageViewer.replyMessage(#{message.id}); return false;",:style => 'width:100%', :id => 'message_write_form' } do |f| -%>
+      <%= f.text_field :subject, :cols => 60, :rows => 8,:label => 'Reply:'%>
+      <%= f.text_area :message, :vertical => true, :cols => 60, :rows => 8, :label => '', :noun => 'Message' %>
+      <%= f.submit_tag 'Reply' %>
+      <% end -%>
+
+<% end -%>      
+    </td>
+  </tr>
+</table>
+

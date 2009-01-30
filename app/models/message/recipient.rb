@@ -54,7 +54,7 @@ module Message::Recipient
     self.recipients.to_s.split(",").each do |recipient|
     
       recipient.strip!
-      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list])
+      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list]) if user_id_list.length > 0
       
       if !usr
         name_parts = recipient.split(" ")
@@ -91,14 +91,14 @@ module Message::Recipient
     self.recipients.to_s.split(",").each do |recipient|
     
       recipient.strip!
-      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list])
+      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list]) if user_id_list.length > 0
       
       if !usr
         name_parts = recipient.split(" ")
         partial_name = name_parts[0..-2].join(" ")
         sub_group = name_parts[-1]
-        if sub_group.blank? && group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',recipient,full_group_id_list ])
-          if group.is_member?(self.from_user)
+        if group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',recipient,full_group_id_list ])
+          if group.is_member?(self.from_user) 
             users += group.users.select { |usr| usr.id != self.from_user_id }
           else
             self.errors.add(:recipients,'could not be found: ' + recipient) 

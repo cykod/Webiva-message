@@ -7,12 +7,8 @@
 <table>
 <tr>
   <td align='center'>
-    <a href='javascript:void(0);' onclick='MessageViewer.writeMessage();'><img src='/components/message/images/write.gif'/></a><br/>
-    <a href='javascript:void(0);' onclick='MessageViewer.writeMessage();'>New Message</a>
-  </td>
-  <td align='center' style='padding-left:10px;'>
-    <a href='javascript:void(0);' onclick='MessageViewer.sentMessages();'><img src='/components/message/images/sent.gif'/></a><br/>
-    <a href='javascript:void(0);' onclick='MessageViewer.sentMessages();'>Sent Messages</a>
+    <a href='javascript:void(0);' onclick='MessageViewer.inbox();'><img src='/components/message/images/email.gif'/></a><br/>
+    <a href='javascript:void(0);' onclick='MessageViewer.inbox();'>View Inbox</a>
   </td>
 </tr>
     
@@ -32,7 +28,7 @@
     <a href='javascript:void(0);' onclick='MessageViewer.viewMessage(<%= t.id %>);'><%= h(t.subject) %></a>
         <%= "</b>" unless t.opened? %>
     </td>
-    <td><%= t.from_user ? h(t.from_user.name) : '-' %></td>
+    <td><%= t.recipients %></td>
     <td><%= t.created_at.strftime(DEFAULT_DATETIME_FORMAT.t) %></td>
   </tr>
   <% end -%>

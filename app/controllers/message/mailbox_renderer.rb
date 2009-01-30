@@ -17,11 +17,14 @@ class Message::MailboxRenderer < ParagraphRenderer
     
     page = params[:page]
     #page = 'inbox' if !ajax?
+    page = 'sent' if params[:message_sent] || params[:update_table].to_s == 'message_sent'
     page ||= 'inbox'
     
     case page
     when 'inbox'
       display_inbox
+    when 'sent'
+      display_sent
     when 'message'
       display_message
     when 'write'
@@ -55,7 +58,8 @@ class Message::MailboxRenderer < ParagraphRenderer
   
   def display_inbox
   
-   @tbl = end_user_table( :message_list,
+  
+ @tbl = end_user_table( :message_list,
                              MessageRecipient, 
                              [ EndUserTable.column(:blank),
                                EndUserTable.column(:blank),
@@ -79,14 +83,50 @@ class Message::MailboxRenderer < ParagraphRenderer
                 :renderer => self
                  }
             
-    
+      
     @display_partial = '/message/mailbox/display_inbox'
+  
+    
+  end
+  
+  def display_sent
+  
+ @display_partial = '/message/mailbox/display_inbox'    
+   @tbl = end_user_table( :message_sent,
+                             MessageRecipient, 
+                             [ EndUserTable.column(:blank),
+                               EndUserTable.column(:blank),
+                               EndUserTable.column(:order,'subject',:label => 'Subject'),
+                               EndUserTable.column(:order,'recipients', :label => 'To'),
+                               EndUserTable.column(:order,'message_messages.created_at', :label => 'Sent At')
+                              ]
+                        )
+    end_user_table_action(@tbl) do |act,mids|
+      if act == 'delete'
+        MessageRecipient.find(:all,:conditions => { :from_user_id => myself.id, :id => mids, :sent => true }).each do |message|
+          message.update_attribute(:deleted,true)
+        end
+      end
+    end
+    
+    end_user_table_generate(@tbl,:conditions => [ "message_recipients.from_user_id = ? AND message_recipients.notification=0 AND deleted=0 AND sent=1",myself.id],:order => 'message_recipients.created_at DESC',:per_page => 10, :include => [ :message_message ] )
+  
+    @view_data = {
+                :tbl => @tbl,
+                :renderer => self
+                 }
+            
+    
+    @display_partial = '/message/mailbox/display_sent'
+ 
   end
   
   
   def display_message
     
-    message = MessageRecipient.find_by_id(params[:message_id],:conditions => { :to_user_id => myself.id })
+    
+    message = MessageRecipient.find_by_id(params[:message_id],:conditions => ['to_user_id  = ? OR from_user_id = ?',myself.id,myself.id] )
+    
     
     if !message.opened?
       message.reload(:lock => true)

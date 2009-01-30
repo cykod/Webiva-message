@@ -31,6 +31,14 @@ MessageViewer = {
     MessageViewer.updateMailbox({ page: 'inbox' });
   },
   
+  sentMessages:function() {
+    MessageViewer.updateMailbox({ page: 'sent' });
+  },
+  
+  inbox:function() {
+    MessageViewer.updateMailbox({ page: 'inbox' });
+  },
+  
   updateMailbox:function(params) {
     new Ajax.Updater("mailbox_details","<%= ajax_url_for(renderer) %>", 
       { parameters: params, 

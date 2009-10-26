@@ -35,7 +35,7 @@ class Message::MailboxFeature < ParagraphFeature
          if data[:overlay]
           { :href => 'javascript:void(0);', :onclick => "SCMS.remoteOverlay('#{data[:mail_page_url]}');" }
          else
-          {:href =>  data[:page_url]  }
+          data[:mail_page_url]
          end
         end
         
@@ -43,7 +43,7 @@ class Message::MailboxFeature < ParagraphFeature
           if data[:overlay]
             { :href => 'javascript:void(0);', :onclick => "SCMS.remoteOverlay('#{data[:text_page_url]}');" }
            else
-            {:href =>  data[:page_url]  }
+             data[:text_page_url]
           end
         end
         c.define_expansion_tag('user:messages') { |tg| data[:messages] > 0 }
@@ -74,6 +74,10 @@ class Message::MailboxFeature < ParagraphFeature
             myself.user_profile_id != t.attr['not'].to_i
           end
         end
+
+        c.expansion_tag('user:details') { |t| t.locals.user = myself } 
+        c.define_user_details_tags('user:details',:local => 'user')
+
     end
   end
   

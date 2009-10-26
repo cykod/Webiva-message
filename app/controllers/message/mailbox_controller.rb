@@ -12,7 +12,9 @@ class Message::MailboxController < ParagraphController
   end
   
   class NotifyOptions < HashModel
-    attributes :mailbox_page_id => nil, :overlay => 'yes', :text_message_page_id => nil
+    attributes :mailbox_page_id => nil, :overlay => 'yes', :text_message_page_id => nil, :update => true
+
+    boolean_options :update
     
     integer_options :mailbox_page_id, :text_message_page_id
     

@@ -358,7 +358,7 @@ class Message::MailboxRenderer < ParagraphRenderer
       MessagePresence.present!(myself)
       
       options = paragraph_options(:notify)
-      data = { :messages => message_count, :user => myself, :mail_page_url => options.mailbox_page_url, :text_page_url => options.text_message_page_url , :overlay => options.overlay == 'yes', :ajax => ajax?, :paragraph => paragraph, :editor => editor?, :present_friends => present_friends  }
+      data = { :messages => message_count, :user => myself, :mail_page_url => options.mailbox_page_url, :text_page_url => options.text_message_page_url , :overlay => options.overlay == 'yes', :ajax => ajax?, :paragraph => paragraph, :editor => editor?, :present_friends => present_friends, :update => options.update  }
       
       session[:message_browsers] ||= {}
       
@@ -410,7 +410,7 @@ class Message::MailboxRenderer < ParagraphRenderer
           </script>
         EOF
       else
-        render_paragraph :partial => '/message/mailbox/notify', :locals => { :feature => message_mailbox_notify_feature(data), :chats => chats,  :new_messages => new_messages, :ajax => ajax?, :renderer => self, :paragraph => paragraph, :editor => editor?, :window_id => window_id }
+        render_paragraph :partial => '/message/mailbox/notify', :locals => { :feature => message_mailbox_notify_feature(data), :chats => chats,  :new_messages => new_messages, :ajax => ajax?, :renderer => self, :paragraph => paragraph, :editor => editor?, :window_id => window_id, :update => options.update }
       end
       
       require_js('prototype')

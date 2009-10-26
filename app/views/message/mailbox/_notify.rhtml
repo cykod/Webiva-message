@@ -1,4 +1,4 @@
-<% unless ajax || editor -%>
+<% unless ajax || editor || !update -%>
 <script>
 
 WindowJar = new CookieJar({
@@ -164,7 +164,7 @@ MessageNotify = {
 
 <% unless ajax -%>
 </div>
-<% unless editor -%>
+<% unless editor || !update -%>
 <script>MessageNotify.timer = setTimeout(function() { MessageNotify.reloadWindow() }, 10000);</script>
 <% end -%>
 <% end -%>

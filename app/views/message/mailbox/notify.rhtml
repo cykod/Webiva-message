@@ -3,5 +3,6 @@
   <%= f.select :mailbox_page_id, SiteNode.page_options %>
   <%= f.select :text_message_page_id, SiteNode.page_options %>
   <%= f.radio_buttons :overlay, [['Yes','yes'],['No','no']] %>
+  <%= f.radio_buttons :update, [['Yes',true],['No',false]] %>
 <% end -%>
 </div>

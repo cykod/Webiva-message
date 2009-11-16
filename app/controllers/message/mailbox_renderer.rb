@@ -8,15 +8,17 @@ class Message::MailboxRenderer < ParagraphRenderer
   paragraph :mailbox, :ajax => true
   paragraph :notify, :ajax => true
   paragraph :text_message, :ajax => true
+  paragraph :write, :ajax => true
   
   include EndUserTable::Controller
 
   def mailbox
-  
+    @options = paragraph_options(:mailbox)
+
     data = {}
     
     page = params[:page]
-    #page = 'inbox' if !ajax?
+    page = 'inbox' if !ajax?
     page = 'sent' if params[:message_sent] || params[:update_table].to_s == 'message_sent'
     page ||= 'inbox'
     
@@ -28,28 +30,31 @@ class Message::MailboxRenderer < ParagraphRenderer
     when 'message'
       display_message
     when 'write'
-      display_write
+      if(!display_write) 
+        display_inbox
+      end
     when 'autocomplete'
-      display_autocomplete
+      json_autocomplete(params[:keyword])
+      return
+    when 'load_message'
+      load_message(params[:load_message_id],@options.template_categories_list)
       return
     end
     
     @view_data[:renderer] = self
-    
+    @view_data[:overlay] = false
+    @view_data[:editor] = editor?
+   
     if ajax?
       render_paragraph :partial =>@display_partial, :locals => @view_data  
     else
       render_paragraph :partial => '/message/mailbox/mailbox', :locals => {:view_data =>  @view_data, :partial => @display_partial  }
-      require_js('prototype.js')
-      require_js('builder')
-      require_js('redbox')
-      require_css('redbox')        
-      require_js('effects.js')
-      require_js('controls.js')
-      require_js('user_application.js')
+      require_ajax_js
       require_js('end_user_table.js')
       require_css('end_user_table.css')
 
+      require_js('protomultiselect/protomultiselect.js') 
+      require_css('/javascripts/protomultiselect/css/style.css')
     end
     
   end
@@ -164,7 +169,7 @@ class Message::MailboxRenderer < ParagraphRenderer
   end
   
   def display_write
-  
+ 
     message = MessageMessage.new()
     
     if request.post? && params[:message] 
@@ -177,93 +182,47 @@ class Message::MailboxRenderer < ParagraphRenderer
         message.valid?
         message.recipient_users.each do |usr|
          valid_users << usr
+          # May need to check if user is a friend...
         end
         if valid_users.length == 0
-          message.errors.add(:recipients,' must be selected')
+          message.errors.add(:recipient_ids,' must be selected')
         end
         
         if message.errors.length == 0
           message.save
-          message.send_message(valid_users)
+          message.send_message(valid_users,:single => @options.single_message ? true : false)
           flash.now[:message_sent] = true
-          display_inbox
-          return
-        else
-          message.update_recipient_ids
+          return false
         end
       end
     end
     
     if params[:recipient_id]
-      message.recipient_ids = params[:recipient_id]
-      new_recipients =[]
-      message.recipients = message.recipients_display.collect do |usr| 
-        if usr.is_a?(SocialUnit)
-          if(usr.sub_groups[0]) 
-            new_recipients << "#{usr.sub_groups[0].underscore}_#{usr.full_identifier}"
-            usr.name + " " + usr.sub_groups[0].humanize.capitalize
-          else
-            new_recipients << usr.full_identifier
-            usr.name
-          end
-        else
-          new_recipients << usr.full_identifier
-          usr.name
-        end
-      end.join(", ")
-      message.recipient_ids = new_recipients.join(",")
-      
+      message.recipient_ids = params[:recipient_id].to_s.split(",").join("###")
     end
     
-
     @suser = SocialUser.user(myself) 
 
     targets = @suser.social_units + EndUser.find(:all,:conditions => { :id => SocialFriend.friends_cache(myself.id) },:order => 'last_name,first_name', :include => :domain_file )
     
     @view_data = { :message => message, :friends => targets }
+
+    if !@options.template_categories.blank?
+      categories = @options.template_categories_list
+      if categories.length > 0
+        @view_data[:message_templates] = MessageTemplate.select_options(:conditions => ['category IN (?)',categories])
+
+      end
+    else
+      @view_data[:message_templates] = []
+    end
+  
     
     @display_partial = '/message/mailbox/write'
-  end
-  
-  def display_autocomplete
     
-    mod_opts = module_options(:message)
-    if params[:message_recipients]
-      @users = []
-      name = params[:message_recipients].split(" ").collect { |elm| elm.strip }.find_all { |elm| !elm.blank? }
-      full_name = name.join(" ")
-      if @users.length == 0  && name.length > 0
-        if(name.length == 1)
-          name = "%" + name[0].downcase + "%"
-          @conditions = [ 'last_name LIKE ? OR first_name LIKE ?',name,name ]
-        else
-          if name[0][-1..-1] == "," # Handle rettig, pascal
-            name = [name[1],name[0][0..-2]]
-          elsif name.length == 3
-            name = [name[0], name[2]]
-          end
-          @conditions = [ 'first_name LIKE ? AND last_name LIKE ?',"%" + name[0].downcase + "%","%" + name[1].downcase + "%" ]
-        end
-        
-        if mod_opts.use_friends 
-          @suser = SocialUser.user(myself) 
-          @users = SocialUnit.find(:all,:conditions => ['social_units.name LIKE ? AND social_unit_members.end_user_id=?', "%#{full_name}%",myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
-
-          @conditions[0] += " AND social_friends.end_user_id= ?"
-          @conditions << myself.id
-          @users += SocialFriend.find(:all,:group => 'end_users.id', :conditions => @conditions,:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
-          
-          
-        else
-          @users = EndUser.find(:all,:conditions => @conditions, :order => 'last_name, first_name')
-        end
-      end      
-          
-    end
-
-    @view_data = { :users => @users }
-    render_paragraph :partial => '/message/mailbox/display_autocomplete', :locals => @view_data  
+    true
   end
+
   
   public
   
@@ -431,9 +390,61 @@ class Message::MailboxRenderer < ParagraphRenderer
       
     end
   end
+
+  def load_message(message_id,categories)
+    @message_template = MessageTemplate.find_by_id(message_id,:conditions => {  :category => categories})
+    render_paragraph :rjs => '/message/mailbox/load_message', :locals => { :message_template => @message_template }
+  end
+
+  def json_autocomplete(keywords)
+    mod_opts = Message::AdminController.module_options
+    if mod_opts.use_friends 
+      @suser = SocialUser.user(myself) 
+      @users = SocialUnit.find(:all,:conditions => ['social_unit_members.end_user_id=?', myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
+      @users += SocialFriend.find(:all,:conditions => ["social_friends.end_user_id=?",myserl.id],:group => 'end_users.id',:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
+    else
+      @users = EndUser.find(:all, :order => 'last_name, first_name')
+    end
+    values = @users.map {  |elm| {  :caption => elm.name, :value => "end_user_#{elm.id}"} }
+    render_paragraph :text => values.to_json()
+  end
   
   
- 
+  def write
+    @options = paragraph_options(:write)
+
+    if ajax? 
+      if params[:keyword]
+        return json_autocomplete(params[:keyword])
+      elsif params[:load_message_id]
+        return load_message(params[:load_message_id],@options.template_categories_list)
+      end
+
+    end
+
+    display_message =  display_write()
+
+    if !display_message
+      render_paragraph :partial => '/message/mailbox/message_sent'
+      return
+    end
+
+
+
+    @view_data[:renderer] = self
+    @view_data[:overlay] = true
+    @view_data[:editor] = editor?
+
+    
+    
+    if ajax?
+      render_paragraph :partial => @display_partial, :locals => @view_data  
+    else
+      render_paragraph :partial => '/message/mailbox/mailbox', :locals => {:view_data =>  @view_data, :partial => @display_partial }
+    end
+
+      
+  end
 
 
 end

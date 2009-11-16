@@ -21,6 +21,9 @@ class MessageRecipient < DomainModel
     self.message_message ? self.message_message.recipients : 'Invalid Message'
   end
 
+ def single?
+    self.message_message ? self.message_message.single? : true
+  end
   
   def self.unread_count(usr,options={})
     with_scope(:find => options) do 

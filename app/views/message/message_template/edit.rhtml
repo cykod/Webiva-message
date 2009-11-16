@@ -2,13 +2,16 @@
 <% admin_form_for :msg, @msg do |f| -%>
   <%= f.text_field :name, :vertical => true,:size=>80 %>
   <%= f.text_field :subject, :vertical => true,:size=>80 %>
+  <%= f.text_field :category, :vertical => true -%>
+  <%= f.spacer -%>
   <%= f.text_area :message, :rows => 20, :cols => 80,:vertical=>true,:description => "Use <cms:button action='act'>...</cms:button> 
   Tags for action buttons (Notifications only)" %>
+  <%= f.check_boxes :notification, [['This is a notification template'.t,true]], :single => true,:vertical => true  %>
+  <%= f.check_boxes :system_message, [['This is a system message'.t,true]], :single => true,:vertical => true %>
+  <%= f.header 'Notification-only Fields' -%>
   <%= f.text_area :success_message, :rows => 5, :cols => 80,:vertical=>true,:description => "Updated message when a notification has succeeded or been accepted" %>
   <%= f.text_area :failure_message, :rows => 5, :cols => 80,:vertical=>true,:description => "Updated message when a notification has failed or been rejrected" %>
   <%= f.text_area :other_message, :rows => 5, :cols => 80,:vertical=>true,:description => "Additional Message used in notifications (e.g. Block)" %>
-  <%= f.check_box :notification  %>
-  <%= f.check_box :system_message %>
   <%= f.submit_tag @msg.id ? "Edit" : "Create" %>
 <% end -%>
 

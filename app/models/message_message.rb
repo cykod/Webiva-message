@@ -17,6 +17,9 @@ class MessageMessage < DomainModel
   
 
   def before_save
+    if self.recipients.blank?
+      self.recipients = self.recipients_display.map(&:name).join(", ")
+    end
     if self.message_thread_id.blank?
       self.message_thread = MessageThread.create    
     end  
@@ -36,7 +39,7 @@ class MessageMessage < DomainModel
         self.message_recipients.create(:from_user => from_user,:to_user_id => to_user.id,:message_thread_id => self.message_thread_id,
                                   :notification => true)
                     
-               mod_opts = Message::AdminController.module_options  
+        mod_opts = Message::AdminController.module_options  
         if msg = MailTemplate.find_by_id(mod_opts.message_template_id)
           msg.deliver_to_user(to_user,{ :from => from_user ? from_user.name : 'the site', :subject => self.subject, :message => self.message.to_s.gsub(/\<cms\:button (.+)\<\/cms:button\>/mi,'') })
         end
@@ -47,7 +50,8 @@ class MessageMessage < DomainModel
                                 
   end
   
-  def send_message(to_users)
+  def send_message(to_users,options={ })
+    self.attributes = options
     self.update_attributes(:notification => false)
     to_users = [to_users] unless to_users.is_a?(Array)
     

@@ -8,13 +8,37 @@
 </div>
 </td>
 <td valign='top'>
-<% cms_form_for :message, message, :url => '', :html => { :onsubmit => 'MessageViewer.submitMessage(); return false;',  :id => 'message_write_form' } do |f| -%>
-<%= f.autocomplete_field :recipients, ajax_url_for(renderer,:page => 'autocomplete'), :vertical => true, :label => 'Message To:', :size => 40, :noun => 'A recipient', :multiple => true, :callback => 'MessageViewer.updateRecipients', :type => 'textarea', :html => { :style => 'width:300px;', :rows =>5 } %>
-<%= f.hidden_field :recipient_ids %>
-<%= f.text_field :subject, :vertical => true, :style => 'width:300px;'  %>
-<%= f.text_area :message, :vertical => true, :style => 'width:300px;', :cols => 45, :rows => 8 %>
-<%= f.submit_cancel_tags 'Send','Cancel',{},{:onclick => 'MessageViewer.cancelMessage(); return false;' } %>
-
+<% cms_form_for :message, message, :url => '', :html => { :onsubmit => 'token_list.update(); MessageViewer.submitMessage(); return false;',  :id => 'message_write_form' } do |f| -%>
+<% f.custom_field :recipient_ids, :vertical => :true, :label => 'Recipients' do  -%>
+  <div class='textboxauto_list'>
+  <%= f.text_field :recipient_ids, :unstyled => true, :style=>'width:500px;' %>
+  <div id="message_recipient_ids_autocomplete" class='textboxauto'>
+    <div class="default">Type the name of someone you have communicated with.</div> 
+    <ul class="feed">
+      <% message.recipients_display.each do |usr| -%>
+        <li value='<%= usr.full_identifier %>'><%= h usr.name -%></li>
+      <% end -%>
+    </ul>
+  </div>
+  </div>
 <% end -%>
+<% if message_templates.length > 0 -%>
+ <%= f.select :message_template_id, [['--Use a template message--',nil]] + message_templates,{}, :onchange => 'MessageViewer.loadMessage(this.value);',:vertical => true,:label => '' -%>
+<% end -%>
+<%= f.text_field :subject, :vertical => true, :style => 'width:500px;', :onkeyup => 'MessageViewer.markEdit();', :onchange => 'MessageViewer.markEdit();'  %>
+<%= f.text_area :message, :vertical => true, :style => 'width:500px;', :rows => 12,  :onkeyup => 'MessageViewer.markEdit();', :onchange => 'MessageViewer.markEdit();' %>
+<%= f.cancel_submit_buttons 'Cancel','Send', {:onclick => overlay ? 'RedBox.close(); return false;' : 'MessageViewer.cancelMessage(); return false;' } %>
+<% end -%>
+
 </td>
 </table>
+<% unless editor -%>
+<script type='text/javascript'>
+token_list = null;
+setTimeout(function() {
+token_list = new ProtoMultiSelectList('message_recipient_ids', 'message_recipient_ids_autocomplete',{fetchFile:'<%= ajax_url_for(renderer) %>?keyword=1&page=autocomplete', separator:'###'});
+},1)
+
+</script>
+<% end -%>
+

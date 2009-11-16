@@ -16,7 +16,7 @@ module Message::Recipient
   end
   
   def recipient_id_array
-    recipient_id_array = self.recipient_ids.to_s.split(",").map { |elm| elm = elm.strip; elm.blank? ? nil : elm }.compact
+    recipient_id_array = self.recipient_ids.to_s.split("###").map { |elm| elm = elm.strip; elm.blank? ? nil : elm }.compact
   end
     
   
@@ -47,77 +47,34 @@ module Message::Recipient
       [ user_id_list, group_id_list, full_group_id_list ]
   end
   
-  def update_recipient_ids
-    user_id_list, group_id_list, full_group_id_list = recipient_arrays
-    
-    users = []
-    self.recipients.to_s.split(",").each do |recipient|
-    
-      recipient.strip!
-      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list]) if user_id_list.length > 0
-      
-      if !usr
-        name_parts = recipient.split(" ")
-        partial_name = name_parts[0..-2].join(" ")
-        sub_group = name_parts[-1]
-        if group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',recipient,full_group_id_list ])
-         if group.is_member?(self.from_user)
-            users << group.full_identifier
-          else
-            self.errors.add(:recipients,'could not be found: ' + recipient) 
-          end
-        elsif group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',partial_name,full_group_id_list ])
-         if group.is_member?(self.from_user)
-             users << sub_group.underscore.downcase + "_" + group.full_identifier
-         else
-           self.errors.add(:recipients,'could not be found: ' + recipient) 
-         end
-        else
-          self.errors.add(:recipients,'could not be found: ' + recipient)
-        end
-      else
-        users << usr.full_identifier
-      end
-    end
-   
-    self.recipient_ids = users.join(",")
-  end
-  
-  
   def recipient_users
     user_id_list, group_id_list, full_group_id_list = recipient_arrays
     
     users = []
-    self.recipients.to_s.split(",").each do |recipient|
-    
-      recipient.strip!
-      usr = EndUser.find(:first,:conditions => ['full_name =? AND id IN (?)',recipient, user_id_list]) if user_id_list.length > 0
+    self.recipient_ids.to_s.split("###").each do |recipient|
       
-      if !usr
-        name_parts = recipient.split(" ")
-        partial_name = name_parts[0..-2].join(" ")
-        sub_group = name_parts[-1]
-        if group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',recipient,full_group_id_list ])
-          if group.is_member?(self.from_user) 
-            users += group.users.select { |usr| usr.id != self.from_user_id }
-          else
-            self.errors.add(:recipients,'could not be found: ' + recipient) 
+      recipient.strip!
+
+      if recipient =~ /(end\_user|social\_unit)\_([0-9]+)/
+        recipient_type = $1
+        recipient_id = $2
+        
+        case recipient_type
+        when 'end_user'
+          usr = EndUser.find_by_id(recipient_id)
+          users << usr if usr
+        when 'social_unit'
+          if group = SocialUnit.find_by_id(recipient_id)
+            if group.is_member?(self.from_user) 
+              users += group.users.select { |usr| usr.id != self.from_user_id }
+            else
+              self.errors.add(:recipients,'could not be found: ' + group.name)
+            end
           end
-        elsif group = SocialUnit.find(:first,:conditions => ['name=? AND id IN (?)',partial_name,full_group_id_list ])
-          sub_group = sub_group.underscore.downcase
-          if group.sub_groups.include?(sub_group) && group.is_member?(self.from_user)
-            users += group.users(sub_group).select { |usr| usr.id != self.from_user_id }       
-          else
-            self.errors.add(:recipients,'could not be found: ' + recipient) 
-          end
-        else
-          self.errors.add(:recipients,'could not be found: ' + recipient)
         end
-      else
-        users << usr
       end
     end
-   
+
     users
   end
   

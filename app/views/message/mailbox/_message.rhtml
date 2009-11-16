@@ -43,7 +43,7 @@
       <% unless message.notification? %>
       <tr>
         <td class='label'>To:</td>
-        <td class='data'><%= message.recipients.blank? ? message.to_user.name :  h(message.recipients) %></td>
+        <td class='data'><%= (message.recipients.blank? || message.single?) ? message.to_user.name :  h(message.recipients) %></td>
       </tr>
       <% end -%>
       <tr>
@@ -57,8 +57,8 @@
       <br/><br/>     
       <% if message.from_user_id != myself.id -%> 
         <% cms_form_for :message, reply, :html => { :onsubmit => "MessageViewer.replyMessage(#{message.id}); return false;",:style => 'width:100%', :id => 'message_write_form' } do |f| -%>
-        <%= f.text_field :subject, :cols => 60, :rows => 8,:label => 'Reply:'%>
-        <%= f.text_area :message, :vertical => true, :cols => 60, :rows => 8, :label => '', :noun => 'Message' %>
+        <%= f.text_field :subject, :size => 60,:label => 'Reply:'%>
+        <%= f.text_area :message, :vertical => true, :style => 'width:500px;',:rows => 8, :label => '', :noun => 'Message' %>
         <%= f.submit_tag 'Reply' %>
         <% end -%>
       <% end -%>

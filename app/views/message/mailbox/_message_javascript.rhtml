@@ -17,6 +17,7 @@ MessageViewer = {
   },
   
   submitMessage:function() {
+    
     var params = Form.serialize('message_write_form') + "&page=write"
     MessageViewer.updateMailbox(params);
   },
@@ -44,7 +45,7 @@ MessageViewer = {
       { parameters: params, 
         evalScripts: true,
         onComplete: function(req) {
-            RedBox.setWindowPosition();
+            <%= "RedBox.setWindowPosition();" if overlay %>
         }
       }    
     );  
@@ -132,7 +133,22 @@ MessageViewer = {
       }
     }
   
-  }
+  },
+
+  messageEdited: false,
+
+  loadMessage: function(message_id) {
+    if(!MessageViewer.messageEdited || confirm("Replace existing message content?")) {
+       var params = { load_message_id: message_id, page: 'load_message' };
+       MessageViewer.messageEdited = false;
+       new Ajax.Request("<%= ajax_url_for(renderer) %>",
+       { parameters: params, 
+       onSuccess: function(req) {   req.responseText.evalScripts(); }}
+        );
+   }
+  },
+
+  markEdit: function() { MessageViewer.messageEdited = true; }
   
   
 };

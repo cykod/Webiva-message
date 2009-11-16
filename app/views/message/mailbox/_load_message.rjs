@@ -1,0 +1,8 @@
+
+if message_template
+ page[:message_subject].value = message_template.subject
+ page[:message_message].value = message_template.message
+else
+ page[:message_subject].value = ''
+ page[:message_message].value = ''
+end

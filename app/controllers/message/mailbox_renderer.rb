@@ -401,7 +401,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     if mod_opts.use_friends 
       @suser = SocialUser.user(myself) 
       @users = SocialUnit.find(:all,:conditions => ['social_unit_members.end_user_id=?', myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
-      @users += SocialFriend.find(:all,:conditions => ["social_friends.end_user_id=?",myserl.id],:group => 'end_users.id',:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
+      @users += SocialFriend.find(:all,:conditions => ["social_friends.end_user_id=?",myself.id],:group => 'end_users.id',:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
     else
       @users = EndUser.find(:all, :order => 'last_name, first_name')
     end

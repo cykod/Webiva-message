@@ -45,6 +45,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     @view_data[:overlay] = false
     @view_data[:editor] = editor?
    
+    @view_data[:mod_opts] = module_options(:message)
     if ajax?
       render_paragraph :partial =>@display_partial, :locals => @view_data  
     else
@@ -83,6 +84,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     
     end_user_table_generate(@tbl,:conditions => [ "to_user_id = ? AND deleted=0 AND sent=0",myself.id],:order => 'message_recipients.created_at DESC',:per_page => 10, :joins => "LEFT JOIN end_users AS from_users ON  `from_users`.id = `message_recipients`.from_user_id", :include => [ :message_message, :from_user ])
   
+
     @view_data = {
                 :tbl => @tbl,
                 :renderer => self

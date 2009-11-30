@@ -3,7 +3,7 @@
 <table>
 <tr>
 <td valign='top'>
-<div <%= "style='display:none;'" if friends.length == 0 %>>
+<div <%= "style='display:none;'" if friends.length == 0 || !mod_opts.user_friends  %>>
   <%= render :partial => '/message/mailbox/friend_selector', :locals => { :friends => friends, :message => message } %>
 </div>
 </td>

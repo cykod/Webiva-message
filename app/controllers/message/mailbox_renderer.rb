@@ -68,7 +68,7 @@ class Message::MailboxRenderer < ParagraphRenderer
                              MessageRecipient, 
                              [ EndUserTable.column(:blank),
                                EndUserTable.column(:blank),
-                               EndUserTable.column(:order,'subject',:label => 'Subject'),
+                               EndUserTable.column(:static,'subject',:label => 'Subject'),
                                EndUserTable.column(:order,'end_users.first_name,end_users.last_name', :label => 'From'),
                                EndUserTable.column(:order,'message_messages.created_at', :label => 'Sent At')
                               ]

@@ -24,11 +24,11 @@
      :style => 'width:100%', :container_id => 'mailbox_details',
      :empty => 'You have no messages',
      :actions => [['Delete Messages','delete','Are you sure you want to delete the selected messages?']] do |t| -%>
-  <tr <%= tbl.highlight_row t %>>
+  <tr <%= "class='unopened'" unless t.opened? -%> <%= tbl.highlight_row t %>>
     <td><%= tbl.entry_checkbox t %></td>
     <td></td>
-    <td>
-        <%= "<b>" unless t.opened? %>
+    <td >
+        <%= "<b>*" unless t.opened? %>
     <a href='javascript:void(0);' onclick='MessageViewer.viewMessage(<%= t.id %>);'><%= h(t.subject) %></a>
         <%= "</b>" unless t.opened? %>
     </td>

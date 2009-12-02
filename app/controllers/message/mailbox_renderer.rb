@@ -436,7 +436,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     @view_data[:renderer] = self
     @view_data[:overlay] = true
     @view_data[:editor] = editor?
-
+    @view_data[:mod_opts] = module_options(:message)
     
     
     if ajax?

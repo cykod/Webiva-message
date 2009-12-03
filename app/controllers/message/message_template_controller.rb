@@ -23,7 +23,7 @@ class Message::MessageTemplateController < ModuleController
   include ActiveTable::Controller
   
   
-  active_table :message_templates_table, MessageTemplate, [:check,:name,:subject,:created_at,:updated_at]
+  active_table :message_templates_table, MessageTemplate, [:check,:name,:subject,:created_at,:updated_at,:category]
                 
 
   def display_message_templates_table(display=true)

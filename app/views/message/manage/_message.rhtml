@@ -1,0 +1,47 @@
+<div class='cms_form'>
+
+    
+<table width='100%'>
+<tr>
+  <td valign='top' style='padding-right:10px;'>
+  <% if message.from_user -%>
+      <%= message.from_user.image.image_tag(:preview) %>
+  <% end -%>
+  </td>
+  <td valign='top' width='100%'>
+      <table class='styled_table' width='100%' cellpadding='0' cellspacing='0'>
+      <tr>
+        <td class='label' style='padding-right:5px;'><b>Sent:</b></td>
+        <td class='data'><%= h(message.created_at.strftime("%A, %B %d %Y %I:%M %P")) %></td>
+      </tr>
+      <% unless message.from_user.blank? %>
+      <tr>
+        <td class='label style='padding-right:5px;' '><b>From:</b></td>
+        <td class='data' width='100%'><%= h(message.from_user.name) %></td>
+      </tr>
+      <% end -%>
+      <% unless message.notification? %>
+      <tr>
+        <td class='label' style='padding-right:5px;' ><b>To:</b></td>
+        <td class='data'><%= ((message.recipients.blank? || message.single?) && !message.sent?) ? message.to_user.name :  h(message.recipients) %></td>
+      </tr>
+      <% end -%>
+      <tr>
+        <td class='label' style='padding-right:5px;' ><b>Subject:</b></td>
+        <td class='data'><%= h(message.subject) %></td>
+      </tr>
+      <tr>
+        <td colspan='2' style='width:500px;'>
+          <%= simple_format(h(message.message_message.message)) %>
+        </td>
+      </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+<div align='right'>
+  <button onclick='RedBox.close(); return false;'>Close</button>
+</div>
+</div>

@@ -2,7 +2,7 @@
 
 class MessageMessage < DomainModel
 
-  has_many :message_recipients
+  has_many :message_recipients, :dependent => :destroy
   
   belongs_to :message_thread
   belongs_to :message_template

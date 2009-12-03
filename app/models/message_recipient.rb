@@ -30,6 +30,11 @@ class MessageRecipient < DomainModel
       self.count(:all,:conditions => ['to_user_id=? AND opened=0 AND sent=0 AND deleted=0',usr.id])
     end  
   end
+
+  def display_recipients
+    ((self.recipients.blank? || self.single?) && 
+     !self.sent?) ? (self.to_user ? self.to_user.name : "Deleted User ##{self.to_user.id}")  :  self.recipients
+  end
   
   def reply_content
     MessageMessage.new(:subject => "Re: " + self.subject.gsub(/^Re\: /,""),:recipients => self.from_user.name,:message_thread_id => self.message_thread_id, :from_user => to_user)

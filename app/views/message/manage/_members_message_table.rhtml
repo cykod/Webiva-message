@@ -1,0 +1,16 @@
+<% active_table_for :members_message_table, @tbl,
+   :refresh_url => url_for(:action => 'display_members_message_table',
+                           :path => @user.id) do |t|  -%>
+<tr >
+ <td align='center'><%= t.deleted? ? 'X' : '' -%></td>
+ <td>
+   <a href='javascript:void(0);' 
+        onclick="MembersMessageViewer.loadMessage(<%= t.id  -%>)"
+        <%= "style='text-decoration: line-through;'" if t.deleted? -%>>
+      <%= v(truncate(t.subject,:length => 50)) -%></a>
+ </td> 
+ <td <%= "style='text-decoration: line-through;'" if t.deleted? -%> > <%= v t.from_user.name if t.from_user -%>
+ <td <%= "style='text-decoration: line-through;'" if t.deleted? -%> ><%= v truncate(t.display_recipients,:length => 50) -%></td>
+ <td><%= v t.created_at.to_s(:short) -%></td>
+</tr>
+<% end -%>

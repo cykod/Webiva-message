@@ -14,6 +14,7 @@ class Message::AdminController < ModuleController
 
   register_handler :navigation, :emarketing, "Message::MessageTemplateController"
   
+  register_handler :members, :view,  "Message::ManageController"
 
   cms_admin_paths "options",
                    "Options" =>   { :controller => '/options' },
@@ -41,13 +42,19 @@ class Message::AdminController < ModuleController
   end
   
   class Options < HashModel
-    attributes :overlay => true, :inbox_page_id => nil, :use_friends => false, :clickatel_api_id  => nil,:clickatel_user => nil, :clickatel_password => nil, :message_footer => '', :daily_limit => 30, :message_header => 'Msg from %%name%%:', :message_template_id => nil, :sms_page_id => nil
+    attributes :overlay => true, :inbox_page_id => nil, 
+    :use_friends => false, :clickatel_api_id  => nil,:clickatel_user => nil, :clickatel_password => nil, :message_footer => '', :daily_limit => 30, :message_header => 'Msg from %%name%%:', 
+    :message_template_id => nil, :sms_page_id => nil,
+    :admin_message_category_templates => nil
     
     integer_options :inbox_page_id, :message_template_id
     boolean_options :overlay, :use_friends 
     
     page_options :inbox_page_id, :sms_page_id
  
+    def admin_message_category_list
+      self.admin_message_category_templates.to_s.strip.split(",").map(&:strip).reject(&:blank?)
+    end
   end
   
 

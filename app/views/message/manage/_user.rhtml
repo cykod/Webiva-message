@@ -1,0 +1,63 @@
+<% if flash[:message_sent] -%>
+  <div  class='flash_notice'>
+    <div>Your message has been sent</div>
+  </div>
+
+<% end -%>
+
+<script type='text/javascript'>
+MembersMessageViewer = {
+  loadMessage:function(message_id) {
+     SCMS.remoteOverlay("<%= url_for :action=>'display_message',:path => @user.id -%>?message_id=" + message_id)
+  },
+
+  messageEdited: false,
+  lastLoaded: 0,
+
+  loadTemplate: function(template_id) {
+  if(!MembersMessageViewer.messageEdited || confirm("Replace existing message content?")) {
+     MembersMessageViewer.lastLoaded =  $('message_message_template_id').selectedIndex;
+    var params = { load_template_id: template_id };
+    MembersMessageViewer.messageEdited = false;
+   new Ajax.Request("<%= url_for :action => 'load_template' %>",
+   { parameters: params, 
+      onSuccess: function(req) {   req.responseText.evalScripts(); }}
+       );
+   } else {
+      setTimeout(function() {
+      $('message_message_template_id').selectedIndex = MembersMessageViewer.lastLoaded;
+       },10);
+   }
+  },
+
+  markEdit: function() { MembersMessageViewer.messageEdited = true; }
+  
+}
+</script>
+
+<% ajax_tabs ['Messages','Write Message'], @write ? 'Write Message' : 'Messages' do |t| -%>
+
+<% t.tab do -%>
+
+<div class='admin_content'>
+  <div id='members_message_table'>
+   <%= render :partial => 'members_message_table' -%>
+  </div>
+</div>
+
+<% end -%>
+
+<% t.tab do |t| -%>
+ <% remote_cms_form_for  :message, @message, :url => { :action => 'user', :path => @user.id, :tab => @tab }, :update => "tab_#{@tab}",:html => { :class => 'admin_form' }  do |f| -%>
+  <%= f.custom_field :to, :value => @user.name -%>
+  <%= f.custom_field :from, :value => myself.name -%>
+  <% if @message_templates -%>
+    <%= f.select :message_template_id, [['--Use a template message--',nil]] + @message_templates,{}, :onchange => 'MembersMessageViewer.loadTemplate(this.value);',:label => '' -%>
+  <% end -%>
+  <%= f.text_field :subject, :size => 60,:onkeyup => 'MessageViewer.markEdit();', :onchange => 'MembersMessageViewer.markEdit();'  -%>
+  <%= f.text_area :message, :rows => 10, :cols => 80, :onchange => 'MembersMessageViewer.markEdit();'   -%>
+  <%= f.submit_tag 'Send' -%>
+ <% end -%>
+<% end -%>
+
+<% end -%>

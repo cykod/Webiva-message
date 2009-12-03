@@ -43,9 +43,13 @@
       <% unless message.notification? %>
       <tr>
         <td class='label'>To:</td>
-        <td class='data'><%= (message.recipients.blank? || message.single?) ? message.to_user.name :  h(message.recipients) %></td>
+        <td class='data'><%= h(message.display_recipients) %></td>
       </tr>
       <% end -%>
+      <tr>
+        <td class='label'>Subject:</td>
+        <td class='data'><%= h(message.subject) %></td>
+      </tr>
       <tr>
         <td colspan='2' style='width:500px;'>
           <hr/>

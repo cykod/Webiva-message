@@ -22,6 +22,7 @@
   </div>
   </div>
 <% end -%>
+<%= hidden_field_tag 'message_vars', message_vars, :id => 'message_vars'  -%>
 <% if message_templates.length > 0 -%>
  <%= f.select :message_template_id, [['--Use a template message--',nil]] + message_templates,{}, :onchange => 'MessageViewer.loadMessage(this.value);',:vertical => true,:label => '' -%>
 <% end -%>

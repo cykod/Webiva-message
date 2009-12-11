@@ -208,6 +208,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     targets = @suser.social_units + EndUser.find(:all,:conditions => { :id => SocialFriend.friends_cache(myself.id) },:order => 'last_name,first_name', :include => :domain_file )
     
     @view_data = { :message => message, :friends => targets }
+    @view_data[:message_vars] = nil
 
     if !@options.template_categories.blank?
       categories = @options.template_categories_list
@@ -393,8 +394,34 @@ class Message::MailboxRenderer < ParagraphRenderer
     end
   end
 
-  def load_message(message_id,categories)
+  def load_message(message_id,categories,args={ })
     @message_template = MessageTemplate.find_by_id(message_id,:conditions => {  :category => categories})
+
+    if @message_template
+      vars = {:user => myself.name }
+      
+      @suser = SocialUser.user(myself) 
+      @unit = @suser.social_units[0]
+      
+      vars[:group]  = @unit.name if @unit
+
+      if args && args.is_a?(String)
+        arg_values = CGI.unescape(args).split("::")
+
+        args ={ }
+        arg_values.each do |val|
+          key,itm = val.split("//")
+          args[key] = itm
+        end
+      end
+      if args
+        vars.merge!(args.symbolize_keys)
+      end
+      
+      @message_template.subject = @message_template.variable_replace(@message_template.subject,vars)
+      @message_template.message = @message_template.variable_replace(@message_template.message,vars)
+    end
+
     render_paragraph :rjs => '/message/mailbox/load_message', :locals => { :message_template => @message_template }
   end
 
@@ -405,7 +432,7 @@ class Message::MailboxRenderer < ParagraphRenderer
       @users = SocialUnit.find(:all,:conditions => ['social_unit_members.end_user_id=?', myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
       @users += SocialFriend.find(:all,:conditions => ["social_friends.end_user_id=?",myself.id],:group => 'end_users.id',:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
     else
-      @users = EndUser.find(:all, :order => 'last_name, first_name')
+      @users = [] #EndUser.find(:all, :order => 'last_name, first_name')
     end
     values = @users.map {  |elm| {  :caption => elm.name, :value => "end_user_#{elm.id}"} }
     render_paragraph :text => values.to_json()
@@ -419,7 +446,7 @@ class Message::MailboxRenderer < ParagraphRenderer
       if params[:keyword]
         return json_autocomplete(params[:keyword])
       elsif params[:load_message_id]
-        return load_message(params[:load_message_id],@options.template_categories_list)
+        return load_message(params[:load_message_id],@options.template_categories_list,params[:message_vars] || { })
       end
 
     end
@@ -437,6 +464,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     @view_data[:overlay] = true
     @view_data[:editor] = editor?
     @view_data[:mod_opts] = module_options(:message)
+    @view_data[:message_vars] = params[:message_vars]
     
     
     if ajax?

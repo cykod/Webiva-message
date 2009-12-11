@@ -139,7 +139,7 @@ MessageViewer = {
 
   loadMessage: function(message_id) {
     if(!MessageViewer.messageEdited || confirm("Replace existing message content?")) {
-       var params = { load_message_id: message_id, page: 'load_message' };
+       var params = { load_message_id: message_id, page: 'load_message', message_vars: $('message_vars').value };
        MessageViewer.messageEdited = false;
        new Ajax.Request("<%= ajax_url_for(renderer) %>",
        { parameters: params, 

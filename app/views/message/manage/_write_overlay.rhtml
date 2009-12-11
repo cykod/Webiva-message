@@ -1,0 +1,72 @@
+<div class='cms_form'>
+<% if flash[:message_sent] -%>
+
+    <div>Your message has been sent</div>
+    <button onclick='RedBox.close();'>Close</button>
+
+<% else -%>
+
+<script type='text/javascript'>
+MembersMessageViewer = {
+  messageEdited: false,
+  lastLoaded: 0,
+
+  loadTemplate: function(template_id) {
+  if(!MembersMessageViewer.messageEdited || confirm("Replace existing message content?")) {
+     MembersMessageViewer.lastLoaded =  $('message_message_template_id').selectedIndex;
+    var params = { load_template_id: template_id };
+    MembersMessageViewer.messageEdited = false;
+   new Ajax.Request("<%= url_for :action => 'load_template' %>",
+   { parameters: params, 
+      onSuccess: function(req) {   req.responseText.evalScripts(); }}
+       );
+   } else {
+      setTimeout(function() {
+      $('message_message_template_id').selectedIndex = MembersMessageViewer.lastLoaded;
+       },10);
+   }
+  },
+
+  markEdit: function() { MembersMessageViewer.messageEdited = true; },
+
+  submitMessage: function(frm) {
+
+    token_list.update(); 
+    SCMS.updateOverlay("<%= url_for :action=>'write_overlay' -%>",Form.serialize(frm))
+   }
+  
+}
+</script>
+ <% cms_form_for  :message, @message, :html => { :class => 'admin_form', :onsubmit => 'MembersMessageViewer.submitMessage(this); return false;' }  do |f| -%>
+  <% f.custom_field :recipient_ids, :vertical => :true, :label => 'Recipients' do  -%>
+  <div class='textboxauto_list'>
+    <%= f.text_field :recipient_ids, :unstyled => true, :style=>'width:500px;' %>
+    <div id="message_recipient_ids_autocomplete" class='textboxauto'>
+      <div class="default">Type the name of someone you have communicated with.</div> 
+      <ul class="feed">
+        <% @message.recipients_display.each do |usr| -%>
+          <li value='<%= usr.full_identifier %>'><%= h usr.name -%></li>
+        <% end -%>
+      </ul>
+    </div>
+  </div>
+   <% end -%>
+  <%= f.custom_field :from, :value => myself.name, :vertical => true -%>
+  <% if @message_templates -%>
+    <%= f.select :message_template_id, [['--Use a template message--',nil]] + @message_templates,{}, :onchange => 'MembersMessageViewer.loadTemplate(this.value);',:label => '', :vertical => true -%>
+  <% end -%>
+  <%= f.text_field :subject, :size => 60,:onkeyup => 'MessageViewer.markEdit();', :onchange => 'MembersMessageViewer.markEdit();', :vertical => true  -%>
+  <%= f.text_area :message, :rows => 10, :cols => 80, :onchange => 'MembersMessageViewer.markEdit();', :vertical => true   -%>
+  <%= f.cancel_submit_buttons 'Cancel','Send', {:onclick => 'RedBox.close(); return false;'  } %>
+<% end -%>
+
+<script type='text/javascript'>
+token_list = null;
+setTimeout(function() {
+token_list = new ProtoMultiSelectList('message_recipient_ids', 'message_recipient_ids_autocomplete',{fetchFile:'<%= url_for :action => 'autocomplete' -%>', separator:'###'});
+},1)
+
+</script>
+
+<% end -%>
+</div>

@@ -6,7 +6,8 @@ class MessageRecipient < DomainModel
   
   belongs_to :from_user, :class_name => 'EndUser',:foreign_key => 'from_user_id'
   belongs_to :to_user, :class_name => 'EndUser',:foreign_key => 'to_user_id'
-  
+  belongs_to :message_thread 
+
   validates_presence_of :to_user_id
    
   def subject

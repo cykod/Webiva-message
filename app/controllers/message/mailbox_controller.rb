@@ -11,6 +11,9 @@ class Message::MailboxController < ParagraphController
   editor_for :write, :name => 'Write Message Overlay'
 
   class MailboxOptions < HashModel
+    attributes :profile_page_id => nil
+    
+    page_options :profile_page_id
   end
   
   class NotifyOptions < HashModel

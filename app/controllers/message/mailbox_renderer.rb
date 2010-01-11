@@ -44,6 +44,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     @view_data[:renderer] = self
     @view_data[:overlay] = false
     @view_data[:editor] = editor?
+    @view_data[:paragraph_options] = @options
    
     @view_data[:mod_opts] = module_options(:message)
     if ajax?
@@ -164,8 +165,11 @@ class Message::MailboxRenderer < ParagraphRenderer
       content = simple_format(h(message.message))
     end
     
+    if message.message_thread
+      previous_messages = message.message_thread.message_history(myself,message)
+    end
     
-    @view_data = { :message => message, :reply => reply, :content => content }
+    @view_data = { :message => message, :reply => reply, :content => content, :previous_messages => previous_messages }
     
     @display_partial = '/message/mailbox/message'
   end

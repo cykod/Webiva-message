@@ -1,4 +1,6 @@
 <div class='cms_form'>
 <%  paragraph_options_form_for :mailbox do |f| -%>
+  <%= f.page_selector :profile_page_id -%>
+  <%= f.select :profile_user_class_id , UserClass.options -%>
 <% end -%>
 </div>

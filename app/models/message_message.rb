@@ -74,6 +74,8 @@ class MessageMessage < DomainModel
       self.message_recipients.create(:from_user_id => from_user_id,:to_user_id => from_user_id,:message_thread_id => self.message_thread_id,:sent => 1,:opened => 1)
     end
   end  
+
+
   
   def update_message(message_name,data)
     self.message = self.message_template.rendered_update(message_name,data)

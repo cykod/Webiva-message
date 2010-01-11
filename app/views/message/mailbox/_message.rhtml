@@ -69,7 +69,12 @@
   </tr>
 <% if previous_messages && previous_messages.length > 0 -%>
  <% previous_messages.each do |message| -%>
-<tr>
+ <tr>
+  <td valign='top'>
+    &nbsp;
+  </td>
+ </tr>
+ <tr>
   <td valign='top'>
   <% if message.from_user -%>
     <% if paragraph_options.profile_page_url && message.from_user != myself && message.from_user.user_class_id== paragraph_options.profile_user_class_id -%>

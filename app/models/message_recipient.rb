@@ -22,6 +22,12 @@ class MessageRecipient < DomainModel
     self.message_message ? self.message_message.recipients : 'Invalid Message'
   end
 
+  def mark_opened!
+      self.update_attribute(:opened,1)
+  end
+
+
+
  def single?
     self.message_message ? self.message_message.single? : true
   end
@@ -38,7 +44,7 @@ class MessageRecipient < DomainModel
   end
   
   def reply_content
-    MessageMessage.new(:subject => "Re: " + self.subject.gsub(/^Re\: /,""),:recipients => self.from_user.name,:message_thread_id => self.message_thread_id, :from_user => to_user)
+    msg = MessageMessage.new(:subject => "Re: " + self.subject.gsub(/^Re\: /,""),:recipients => self.from_user.name,:message_thread_id => self.message_thread_id, :from_user => to_user, :recipient_id_arr => [ "end_user_#{self.from_user_id}" ])
   end
   
   def notification_class_instance

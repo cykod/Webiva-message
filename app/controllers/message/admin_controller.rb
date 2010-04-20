@@ -3,7 +3,7 @@
 class Message::AdminController < ModuleController
 
   component_info 'Message', :description => 'User Messaging support', 
-                              :access => :private
+                              :access => :public
                               
   # Register a handler feature
   register_permission_category :message, "Message" ,"Permissions related to User Messaging"
@@ -42,16 +42,14 @@ class Message::AdminController < ModuleController
   end
   
   class Options < HashModel
-    attributes :overlay => true, :inbox_page_id => nil, 
-    :use_friends => false, :clickatel_api_id  => nil,:clickatel_user => nil, :clickatel_password => nil, :message_footer => '', :daily_limit => 30, :message_header => 'Msg from %%name%%:', 
-    :message_template_id => nil, :sms_page_id => nil,
+    attributes :overlay => true, :inbox_page_url => nil, 
+    :use_friends => false,  :daily_limit => 30,
+    :message_template_id => nil,
     :admin_message_category_templates => nil
     
-    integer_options :inbox_page_id, :message_template_id
+    integer_options :message_template_id
     boolean_options :overlay, :use_friends 
     
-    page_options :inbox_page_id, :sms_page_id
- 
     def admin_message_category_list
       self.admin_message_category_templates.to_s.strip.split(",").map(&:strip).reject(&:blank?)
     end

@@ -21,7 +21,7 @@
     <% if paragraph_options.profile_page_url && message.from_user != myself && message.from_user.user_class_id == paragraph_options.profile_user_class_id -%>
       <%= link_to message.from_user.image.image_tag(:preview), "#{paragraph_options.profile_page_url}/#{message.from_user.id}"  %>
     <% else -%>
-      <%= message.from_user.image.image_tag(:preview) %>
+      <%= message.from_user.image.image_tag(:preview) if message.from_user && message.from_user.image %>
     <% end -%>
   <% end -%>
   </td>

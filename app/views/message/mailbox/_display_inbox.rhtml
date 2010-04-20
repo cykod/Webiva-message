@@ -1,27 +1,6 @@
-<% if flash[:message_sent] %>
-<div class='message_msg' style='text-align:center;'>
- Your message has been sent
-</div>
-<% end -%>
-<div class='message_header'>
-<table>
-<tr>
-  <td align='center'>
-    <a href='javascript:void(0);' onclick='MessageViewer.writeMessage();'><img src='/components/message/images/write.gif'/></a><br/>
-    <a href='javascript:void(0);' onclick='MessageViewer.writeMessage();'>New Message</a>
-  </td>
-  <td align='center' style='padding-left:10px;'>
-    <a href='javascript:void(0);' onclick='MessageViewer.sentMessages();'><img src='/components/message/images/sent.gif'/></a><br/>
-    <a href='javascript:void(0);' onclick='MessageViewer.sentMessages();'>Sent Messages</a>
-  </td>
-</tr>
-    
-</table>
-</div>
-<br/><br/>
-<div align='left'>
   <% end_user_table_for tbl,
      :style => 'width:100%', :container_id => 'mailbox_details',
+     :class => "message_table",
      :empty => 'You have no messages',
      :actions => [['Delete Messages','delete','Are you sure you want to delete the selected messages?']] do |t| -%>
   <tr <%= "class='unopened'" unless t.opened? -%> <%= tbl.highlight_row t %>>
@@ -36,4 +15,3 @@
     <td><%= t.created_at.strftime(DEFAULT_DATETIME_FORMAT.t) %></td>
   </tr>
   <% end -%>
-</div>

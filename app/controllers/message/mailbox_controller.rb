@@ -4,9 +4,8 @@ class Message::MailboxController < ParagraphController
 
   editor_header 'Message Paragraphs'
   
-  editor_for :mailbox, :name => "Mailbox"
-  editor_for :text_message, :name => 'Text Messaging'
-  editor_for :notify, :name => 'Notification Bar', :features => [:message_mailbox_notify]
+  editor_for :mailbox, :name => "Mailbox", :feature => :message_mailbox_mailbox
+  editor_for :notify, :name => 'Notification Bar', :feature => :message_mailbox_notify
 
   editor_for :write, :name => 'Write Message Overlay'
 
@@ -17,13 +16,11 @@ class Message::MailboxController < ParagraphController
   end
   
   class NotifyOptions < HashModel
-    attributes :mailbox_page_id => nil, :overlay => 'yes', :text_message_page_id => nil, :update => true
+    attributes :mailbox_page_id => nil, :overlay => 'yes', :update => true
 
     boolean_options :update
     
-    integer_options :mailbox_page_id, :text_message_page_id
-    
-    page_options :mailbox_page_id, :text_message_page_id
+    page_options :mailbox_page_id
     
   end
 

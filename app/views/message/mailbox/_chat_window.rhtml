@@ -1,6 +1,0 @@
-<div class='cms_form'>
-<%  paragraph_options_form_for :write do |f| -%>
-  <%= f.radio_buttons :single_message, [['Yes',true],['No',false]], :label => 'Single Recipient Display',:description => 'Message should appear to only be sent to 1 recipient'  %>
-  <%= f.text_field :template_categories,:description => 'Allow selection of one or more default messages (comma separated list)'  -%>
-<% end -%>
-</div>

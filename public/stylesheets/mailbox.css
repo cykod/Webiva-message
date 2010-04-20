@@ -1,0 +1,74 @@
+
+
+.message_notification { 
+   border:1px solid #CCCCCC;
+   padding:10px;
+   margin:5px 0px;
+   color:black;
+}
+
+.message_button_row { margin:0px 0px 10px 0px; }
+
+.message_button_row a {
+  display:inline-block;
+  padding:5px 5px;
+  border:1px solid #CCCCCC;
+  background:#DDDDDD;
+  color:black;
+  margin:0px 5px;
+  text-decoration:none;
+}
+
+.message_table td { padding:5px 10px; background-color:white !important; }
+.message_table th { background-color:#999999; color:white; padding:5px 4px; }
+.message_table th a { color:white; }
+.message_table .highlighted_row { background-color:#DDDDDD; }
+
+.message_table tr.selected_row { background-color:#CCCCCC; }
+
+ul.message_header, ul.message_header li {
+  padding:0; margin:0;
+  list-style:none;
+  padding:5px;
+}
+
+ul.message_header {
+  border-bottom:1px solid #000000;
+
+}
+
+
+ul.message_header li { display: inline-block; }
+ul.message_header li:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+html[xmlns] ul.message_header li { display: block; }
+* html ul.message_header li { height: 1%; }
+
+ul.message_header li label { display:block; width:50px; float:left; padding-top:.2em; text-align:right; padding-right:5px; font-weight:bold; }
+ul.message_header li label { line-height:100%; padding-top:0; }
+ul.message_header li label input { line-height:100%; vertical-align:middle; margin-top:-0.1em;}
+
+
+
+ul.message_reply, ul.message_reply li {
+  padding:0; margin:0;
+  list-style:none;
+}
+ul.message_reply li { padding-top:5px; } 
+ul.message_reply li label { display:block; }
+ul.message_reply li.header { border-bottom:1px solid #CCCCCC; margin-top:10px; margin-bottom:5px; padding-bottom:4px; font-weight:bold; }
+ul.message_reply li input.text_field, ul.message_reply li textarea { width:100%; } 
+.message_body {  padding:20px; }
+
+
+
+ul.message_thread_header li { display: inline-block; }
+ul.message_thread_header li:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+html[xmlns] ul.message_thread_header li { display: block; }
+* html ul.message_thread_header li { height: 1%; }
+
+ul.message_thread_header li label { display:block; width:50px; float:left; padding-top:.2em; text-align:right; padding-right:5px; font-weight:bold; }
+ul.message_thread_header li label { line-height:100%; padding-top:0; }
+ul.message_thread_header li label input { line-height:100%; vertical-align:middle; margin-top:-0.1em;}
+.message_thread_body {  padding:20px; }
+
+

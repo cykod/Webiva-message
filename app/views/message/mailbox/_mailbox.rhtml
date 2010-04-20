@@ -1,14 +1,9 @@
 <script>
-
   <%= render :partial => '/message/mailbox/message_javascript', :locals =>  view_data  %>
-
-
 </script>
 
 <div class='mailbox' id='mailbox_container'>
-
-<div id='mailbox_details'>
-    <%= render :partial => partial, :locals => view_data %>
-</div>
-
+   <div id='mailbox_details'>
+       <%= feature_output %>
+   </div>
 </div>

@@ -134,7 +134,7 @@ class Message::MailboxRenderer < ParagraphRenderer
     end
     
     if message.notification?
-      content =  message_mailbox_notification_feature({:message => message},simple_format(message.message))
+      content =  message_mailbox_notification_feature({:message => message, :custom_feature_body => simple_format(message.message)})
     else
       content = simple_format(h(message.message))
     end

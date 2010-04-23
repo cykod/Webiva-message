@@ -31,9 +31,6 @@ class Message::MailboxFeature < ParagraphFeature
 
       <div class='message_message'>
         <cms:from_user>
-        <div class='message_image'>
-            <cms:profile_link><cms:image/></cms:profile_link>
-        </div>
         </cms:from_user>
         <ul class='message_header'>
           <cms:header><li><label><cms:field/>:</label><cms:display/></li></cms:header>
@@ -41,7 +38,7 @@ class Message::MailboxFeature < ParagraphFeature
         <div class='message_body'><cms:message_body/></div>
         <cms:reply>
           <ul class='message_reply'>
-            <li class='header'>Reply to this message:</li>
+            <li class='message_header'>Reply to this message:</li>
             <cms:reply_errors>
               <li class='error'><cms:value/></li>
             </cms:reply_errors>
@@ -55,9 +52,6 @@ class Message::MailboxFeature < ParagraphFeature
           <cms:message>
           <div class='message_thread'>
            <cms:from_user>
-              <div class='message_thread_image'>
-                 <cms:profile_link><cms:image/></cms:profile_link>
-              </div>
            </cms:from_user>
            <ul class='message_thread_header'>
              <cms:header><li><label><cms:field/>:</label><cms:display/></li></cms:header>
@@ -139,7 +133,7 @@ class Message::MailboxFeature < ParagraphFeature
     c.expansion_tag("#{name_base}:from_user") { |t| t.locals.user = t.locals.send(local).from_user }
 
     c.link_tag("#{name_base}:profile") { |t| "#" }
-    c.image_tag("#{name_base}:image") { |t| t.locals.user.image }
+    c.image_tag("#{name_base}:image",nil,nil,:size => 'small') { |t| t.locals.user.image }
 
     c.define_tag("#{name_base}:header") do |t|
       msg = t.locals.send(local)
@@ -212,8 +206,8 @@ class Message::MailboxFeature < ParagraphFeature
   feature :message_mailbox_notification
   
   
-  def message_mailbox_notification_feature(data,feature_content)
-    webiva_custom_feature(feature_content) do |c|
+  def message_mailbox_notification_feature(data)
+    webiva_custom_feature(:message_mailbox_notification,data) do |c|
       c.define_tag("button") { |tg| "<button onclick='MessageViewer.submitNotification(#{data[:message].id},\"#{tg.attr['action']}\");'>#{tg.expand}</button>" }
     end
   end

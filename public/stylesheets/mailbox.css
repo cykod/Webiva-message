@@ -19,6 +19,7 @@
   text-decoration:none;
 }
 
+.message_image { float:left; padding:0 10px 10px 0; }
 .message_table td { padding:5px 10px; background-color:white !important; }
 .message_table th { background-color:#999999; color:white; padding:5px 4px; }
 .message_table th a { color:white; }
@@ -55,7 +56,7 @@ ul.message_reply, ul.message_reply li {
 }
 ul.message_reply li { padding-top:5px; } 
 ul.message_reply li label { display:block; }
-ul.message_reply li.header { border-bottom:1px solid #CCCCCC; margin-top:10px; margin-bottom:5px; padding-bottom:4px; font-weight:bold; }
+ul.message_reply li.message_header { border-bottom:1px solid #CCCCCC; margin-top:10px; margin-bottom:5px; padding-bottom:4px; font-weight:bold; }
 ul.message_reply li input.text_field, ul.message_reply li textarea { width:100%; } 
 .message_body {  padding:20px; }
 

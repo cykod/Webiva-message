@@ -12,7 +12,7 @@ class MessageMessage < DomainModel
   attr_accessor :parent_message_id,:recipient_id_arr
   
   validates_presence_of :subject,:message
-  validate :valid_recipients
+  validate_on_create :valid_recipients
   
   serialize :data
 
@@ -65,8 +65,12 @@ class MessageMessage < DomainModel
   end
   
   def send_notification(to_users,nclass=nil,data={})
-    to_users = [ to_users ] unless to_users.is_a?(Array)
-    @recipients_display = to_users
+    if to_users.blank?
+      to_users = self.recipient_users
+    else
+      to_users = [ to_users ] unless to_users.is_a?(Array)
+      @recipients_display = to_users
+    end
     self.update_attributes(:notification => true,:notification_class => nclass.to_s.underscore,:data => data)
 
     to_users = [ to_users ] unless to_users.is_a?(Array)
@@ -92,12 +96,16 @@ class MessageMessage < DomainModel
   end
 
   def deliver_message(opts = {})
-    self.valid? ? self.send_message(self.recipient_users,opts) : false
+    self.valid? ? self.send_message(false,opts) : false
   end
 
   def send_message(to_users,options={ })
-    to_users = [ to_users ] unless to_users.is_a?(Array)
-    @recipients_display = to_users
+    if to_users.blank?
+      to_users = self.recipient_users
+    else
+      to_users = [ to_users ] unless to_users.is_a?(Array)
+      @recipients_display = to_users
+    end
     self.attributes = options
     self.update_attributes(:notification => false)
     to_users = [to_users] unless to_users.is_a?(Array)
@@ -136,12 +144,12 @@ class MessageMessage < DomainModel
     if !@recipient_id_arr
       @recipients_display = []
     else
-      recipients = recipient_arrays
+      recipients_list = recipient_arrays
 
-      @recipients_display = []
-      @recipients_display += EndUser.find(:all,:conditions => ['id in (?)',recipients[:user_ids]]) if recipients[:user_ids]
-      @recipients_display += SocialUnit.find(:all,:conditions => ['id IN (?)',recipients[:group_ids]]) if recipients[:group_ids]
-      @recipients_display
+      @recipients_list_display = []
+      @recipients_list_display += EndUser.find(:all,:conditions => ['id in (?)',recipients_list[:user_ids]]) if recipients_list[:user_ids]
+      @recipients_list_display += SocialUnit.find(:all,:conditions => ['id IN (?)',recipients_list[:group_ids]]) if recipients_list[:group_ids]
+      @recipients_list_display
     end
 
   end
@@ -180,21 +188,21 @@ class MessageMessage < DomainModel
   end
 
   def recipient_users
-    recipients =  recipient_arrays
+    recipients_list =  recipient_arrays
 
     users = []
-    if recipients[:user_ids].length > 0
-      recipient_users = EndUser.find(:all,:conditions => { :id => recipients[:user_ids] }).index_by(&:id)
+    if recipients_list[:user_ids].length > 0
+      recipient_users = EndUser.find(:all,:conditions => { :id => recipients_list[:user_ids] }).index_by(&:id)
       # order them in the order sent
-      users +=  recipients[:user_ids].map { |uid| recipient_users[uid.to_i] }.compact
+      users +=  recipients_list[:user_ids].map { |uid| recipient_users[uid.to_i] }.compact
     end
 
-    if recipients[:group_ids].length > 0
-      groups = SocialUnit.find(:all,:conditions => { :id => recipients[:group_ids] }).index_by(&:id)
+    if recipients_list[:group_ids].length > 0
+      groups = SocialUnit.find(:all,:conditions => { :id => recipients_list[:group_ids] }).index_by(&:id)
 
-      recipients[:group_ids].each do |gid|
+      recipients_list[:group_ids].each do |gid|
         group = groups[gid.to_i]
-        if group && group.is_member?(self.from_user) 
+        if group && group.is_admin?(self.from_user) 
           users += group.users.select { |usr| usr.id != self.from_user_id }
         end
       end

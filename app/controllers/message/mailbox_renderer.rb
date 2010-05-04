@@ -8,6 +8,19 @@ class Message::MailboxRenderer < ParagraphRenderer
   paragraph :mailbox, :ajax => true
   paragraph :notify, :ajax => true
   paragraph :write, :ajax => true
+  paragraph :messaging_javascript
+
+
+  def messaging_javascript(output=true)
+    require_ajax_js
+    require_js('end_user_table.js')
+    require_css('end_user_table.css')
+
+    require_js('protomultiselect/protomultiselect.js') 
+    require_css('/javascripts/protomultiselect/css/style.css')
+
+    render_paragraph :nothing => true if output
+  end
   
   include EndUserTable::Controller
 
@@ -20,7 +33,9 @@ class Message::MailboxRenderer < ParagraphRenderer
     page = 'inbox' if !ajax?
     page = 'sent' if params[:message_sent] || params[:update_table].to_s == 'message_sent'
     page ||= 'inbox'
-    
+   
+    @mod_opts = module_options(:message)
+
     case page
     when 'inbox':   display_inbox
     when 'sent':    display_sent
@@ -39,18 +54,14 @@ class Message::MailboxRenderer < ParagraphRenderer
     @view_data[:editor] = editor?
     @view_data[:paragraph_options] = @options
    
-    @view_data[:mod_opts] = module_options(:message)
+    @view_data[:mod_opts] = @mod_opts
+
     feature_output = message_mailbox_mailbox_feature(@view_data)
     if ajax?
       render_paragraph :text => feature_output
     else
       render_paragraph :partial => '/message/mailbox/mailbox', :locals => {:feature_output => feature_output, :view_data => @view_data  }
-      require_ajax_js
-      require_js('end_user_table.js')
-      require_css('end_user_table.css')
-
-      require_js('protomultiselect/protomultiselect.js') 
-      require_css('/javascripts/protomultiselect/css/style.css')
+      messaging_javascript(false)
     end
     
   end
@@ -76,7 +87,7 @@ class Message::MailboxRenderer < ParagraphRenderer
       end
     end
 
-    end_user_table_generate(@tbl,:conditions => [ "to_user_id = ? AND deleted=0 AND sent=0",myself.id],:order => 'message_recipients.created_at DESC',:per_page => 10, :joins => "LEFT JOIN end_users AS from_users ON  `from_users`.id = `message_recipients`.from_user_id", :joins => [ :message_message, :from_user ], :include => [ :message_message, :from_user] )
+    end_user_table_generate(@tbl,:conditions => [ "to_user_id = ? AND deleted=0 AND sent=0",myself.id],:order => 'message_recipients.created_at DESC',:per_page => 10, :joins => "LEFT JOIN end_users AS from_users ON  `from_users`.id = `message_recipients`.from_user_id",  :include => [ :message_message, :from_user] )
 
     @view_data = {  :tbl => @tbl, :renderer => self, :page => 'inbox' }
   end
@@ -164,9 +175,15 @@ class Message::MailboxRenderer < ParagraphRenderer
 
     @suser = SocialUser.user(myself) 
 
-    targets = @suser.social_units + EndUser.find(:all,:conditions => { :id => SocialFriend.friends_cache(myself.id) },:order => 'last_name,first_name', :include => :domain_file )
+    targets = []
+    if @mod_opts.use_friends && false
+      targets = @suser.admin_social_units + EndUser.find(:all,:conditions => { :id => SocialFriend.friends_cache(myself.id) },:order => 'last_name,first_name', :include => :domain_file )
+    end
 
-    @view_data = { :message => message, :friends => targets }
+    @view_data = {}
+
+    @view_data[:message] = message
+    @view_data[:friends] = targets
     @view_data[:message_vars] = nil
 
     if !@options.template_categories.blank?
@@ -188,10 +205,6 @@ class Message::MailboxRenderer < ParagraphRenderer
   
   
   def notify
-    if !myself.id 
-      render_paragraph :text => ''
-      return
-    end
 
     message_count = MessageRecipient.unread_count(myself)
 
@@ -199,18 +212,13 @@ class Message::MailboxRenderer < ParagraphRenderer
     data = { :messages => message_count, :user => myself, :mail_page_url => options.mailbox_page_url, :overlay => options.overlay == 'yes', :ajax => ajax?, :paragraph => paragraph, :editor => editor?,  :update => options.update  }
     feature_output = message_mailbox_notify_feature(data)
 
-    require_js('prototype')
-    require_js('effects')
-    require_js('builder')
     if options.overlay
+      messaging_javascript(false)
       require_js('redbox')
       require_css('redbox')        
-      require_js('end_user_table')
-      require_css('end_user_table.css')
     end
-    require_js('user_application')
 
-    render :text => feature_output
+    render_paragraph :text => feature_output
   end
 
   def load_message(message_id,categories,args={ })
@@ -248,12 +256,12 @@ class Message::MailboxRenderer < ParagraphRenderer
     mod_opts = Message::AdminController.module_options
     if mod_opts.use_friends 
       @suser = SocialUser.user(myself) 
-      @users = SocialUnit.find(:all,:conditions => ['social_unit_members.end_user_id=?', myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
+      @users = SocialUnit.find(:all,:conditions => ['social_unit_members.role = "admin" AND social_unit_members.end_user_id=?', myself.id],:group => 'social_units.id', :joins => 'LEFT JOIN social_unit_members ON (social_unit_members.social_unit_id = social_units.id)' )
       @users += SocialFriend.find(:all,:conditions => ["social_friends.end_user_id=?",myself.id],:group => 'end_users.id',:joins => [ :friend_user ]).collect { |usr| usr.friend_user }
     else
       @users =EndUser.find(:all, :order => 'last_name, first_name')
     end
-    values = @users.map {  |elm| {  :caption => elm.name, :value => "end_user_#{elm.id}"} }
+    values = @users.map {  |elm| {  :caption => elm.name, :value => "#{elm.class.to_s.underscore}_#{elm.id}"} }
     render_paragraph :text => values.to_json()
   end
   
@@ -270,6 +278,8 @@ class Message::MailboxRenderer < ParagraphRenderer
 
     end
 
+    @mod_opts =  module_options(:message)
+
     display_message =  display_write()
 
     if !display_message
@@ -277,19 +287,20 @@ class Message::MailboxRenderer < ParagraphRenderer
       return
     end
 
-
+    
 
     @view_data[:renderer] = self
     @view_data[:overlay] = true
     @view_data[:editor] = editor?
-    @view_data[:mod_opts] = module_options(:message)
+    @view_data[:mod_opts] = @mod_opts
     @view_data[:message_vars] = params[:message_vars]
     
-    
+    feature_output = message_mailbox_mailbox_feature(@view_data)
+   
     if ajax?
       render_paragraph :partial => @display_partial, :locals => @view_data  
     else
-      render_paragraph :partial => '/message/mailbox/mailbox', :locals => {:view_data =>  @view_data, :partial => @display_partial }
+      render_paragraph :partial => '/message/mailbox/mailbox', :locals => {:view_data => @view_data, :feature_output => feature_output, :partial => @display_partial }
     end
 
       

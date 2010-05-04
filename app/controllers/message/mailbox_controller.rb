@@ -9,6 +9,8 @@ class Message::MailboxController < ParagraphController
 
   editor_for :write, :name => 'Write Message Overlay'
 
+  editor_for :messaging_javascript, :name => 'Messaging Javascript Includes', :no_options => true
+
   class MailboxOptions < HashModel
     attributes :profile_page_id => nil, :profile_user_class_id => nil
     

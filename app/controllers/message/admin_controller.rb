@@ -42,7 +42,7 @@ class Message::AdminController < ModuleController
   end
   
   class Options < HashModel
-    attributes :overlay => true, :inbox_page_url => nil, 
+    attributes :overlay => true, :write_page_url => nil, 
     :use_friends => false,  :daily_limit => 30,
     :message_template_id => nil,
     :admin_message_category_templates => nil

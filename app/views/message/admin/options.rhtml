@@ -1,11 +1,12 @@
 <div class='admin_content'>
 <% cms_form_for :options, @options, :html => {:class =>'admin_form' } do |f| -%>
   <% if SiteModule.module_enabled?('social') %>
-    <%= f.radio_buttons :use_friends, [['Yes',true],['No',false]], :label => 'Use Social Module friends' %>
+    <%= f.yes_no :use_friends,  :label => 'Use Social Module friends' %>
   <% end -%>
 
   <%= f.radio_buttons :overlay, [['Yes',true],['No',false]] %>
-  <%= f.url_selector :inbox_page_url %>
+  <%= f.url_selector :write_page_url, :label => 'Page with a write overlay paragraph for sending message (or a mailbox paragraph)' %>
+
   <%= f.select :message_template_id, MailTemplate.site_template_options %>
   <%= f.text_field :daily_limit %>
   <%= f.text_field :admin_message_category_templates -%>

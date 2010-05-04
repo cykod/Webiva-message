@@ -138,10 +138,11 @@ class Message::MailboxFeature < ParagraphFeature
     c.define_tag("#{name_base}:header") do |t|
       msg = t.locals.send(local)
       values = { "sent"=> [ "Sent".t, msg.created_at.to_s(:long) ],
-                 "from"=> [ "From".t, msg.from_user.name ],
                  "to"=> msg.notification? ? nil : [ "To", msg.display_recipients ],
                  "subject"=> [ "Subject".t,msg.subject ]
                }
+      values["from"] = [ "From".t, msg.from_user.name ] if msg.from_user
+
       fields = t.attr['fields'] ? t.attr['fields'].split(",").map(&:strip) : %w(sent from to subject)
       field_values = fields.map { |fld| values[fld] }.compact
       c.each_local_value(field_values,t,"header_value")
@@ -170,9 +171,7 @@ class Message::MailboxFeature < ParagraphFeature
 
   def message_mailbox_notify_feature(data)
     webiva_feature(:message_mailbox_notify) do |c|
-      c.define_tag('user') do |t| 
-        t.expand
-      end
+      c.expansion_tag('user') { |t| t.locals.user = myself if myself.id }
         c.define_link_tag('user:mailbox') do |tag|
          if data[:overlay]
           { :href => 'javascript:void(0);', :onclick => "SCMS.remoteOverlay('#{data[:mail_page_url]}');" }
@@ -197,8 +196,7 @@ class Message::MailboxFeature < ParagraphFeature
           end
         end
 
-        c.expansion_tag('user:details') { |t| t.locals.user = myself } 
-        c.define_user_details_tags('user:details',:local => 'user')
+        c.define_user_details_tags('user',:local => 'user')
 
     end
   end

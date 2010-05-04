@@ -3,9 +3,11 @@
 <table>
 <tr>
 <td valign='top'>
-<div <%= "style='display:none;'" if friends.length == 0 || !mod_opts.user_friends  %>>
+  <% if friends.length > 0 || mod_opts.user_friends %>
+<div>
   <%= render :partial => '/message/mailbox/friend_selector', :locals => { :friends => friends, :message => message } %>
 </div>
+<% end -%>
 </td>
 <td valign='top'>
 <% cms_form_for :message, message, :url => '', :html => { :onsubmit => 'token_list.update(); MessageViewer.submitMessage(); return false;',  :id => 'message_write_form' } do |f| -%>
@@ -13,7 +15,7 @@
   <div class='textboxauto_list'>
   <%= f.text_field :recipient_ids, :unstyled => true, :style=>'width:500px;' %>
   <div id="message_recipient_ids_autocomplete" class='textboxauto'>
-    <div class="default">Type the name of someone you have communicated with.</div> 
+    <div class="default">Type the name of a friend or a group you administer.</div> 
     <ul class="feed">
       <% message.recipients_display.each do |usr| -%>
         <li value='<%= usr.full_identifier %>'><%= h usr.name -%></li>

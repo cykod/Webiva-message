@@ -3,7 +3,7 @@
 class Message::AdminController < ModuleController
 
   component_info 'Message', :description => 'User Messaging support', 
-                              :access => :public
+                              :access => :private
                               
   # Register a handler feature
   register_permission_category :message, "Message" ,"Permissions related to User Messaging"

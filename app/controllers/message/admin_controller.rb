@@ -12,7 +12,7 @@ class Message::AdminController < ModuleController
                                   [ :config, 'Configure Messaging', 'Configure Messaging' ]
                                   ]
 
-  register_handler :navigation, :emarketing, "Message::MessageTemplateController"
+  register_handler :navigation, :mail, "Message::MessageTemplateController"
   
   register_handler :members, :view,  "Message::ManageController"
 

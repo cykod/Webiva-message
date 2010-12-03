@@ -6,12 +6,12 @@ class Message::MessageTemplateController < ModuleController
   permit 'message_manage'
   component_info 'Message'
   
-   cms_admin_paths "content",
-                   "Content" =>   { :controller => '/content' },
+   cms_admin_paths "mail",
+                   "Mail" =>   { :controller => '/mail_manager' },
                    "Messaging Templates" => { :action => 'index' }
   
   
-  def self.navigation_emarketing_handler_info
+  def self.navigation_mail_handler_info
      {
      :pages => 
         [ [ "Messaging Templates", :message_manage, "emarketing_campaigns.gif", {  :controller => '/message/message_template' },
@@ -41,7 +41,7 @@ class Message::MessageTemplateController < ModuleController
   end 
 
   def index
-    cms_page_path [ "Content"],"Messaging Templates"
+    cms_page_path [ "Mail"],"Messaging Templates"
   
     display_message_templates_table(false)
   end
@@ -50,7 +50,7 @@ class Message::MessageTemplateController < ModuleController
   def edit
     @msg = MessageTemplate.find_by_id(params[:path][0]) || MessageTemplate.new
     
-    cms_page_path [ "Content", "Messaging Templates"],@msg.id  ? 'Edit Message Template' : 'Create Message Template'
+    cms_page_path [ "Mail", "Messaging Templates"],@msg.id  ? 'Edit Message Template' : 'Create Message Template'
 
     if request.post? && @msg.update_attributes(params[:msg])
       redirect_to :action => 'index'    
